@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<title>W3.CSS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+<body>
+    <div class="w3-container">
+        <div class="w3-row w3-margin">
+            <div class="w3-col">
+                <a href="index.html">Trở về danh sách sản phẩm</a>
+            </div>
+        </div>
+        <div class="w3-row w3-margin">
+            <form class="w3-container w3-card-4" name="product-form">
+                <h2 class="w3-text-blue">Tạo mới sản phẩm</h2>
+                <p>Vui lòng nhập các thông tin bên dưới</p>
+                <p>
+                    <label class="w3-text-blue"><b>Tiêu đề</b></label>
+                    <input class="w3-input w3-border" name="title" type="text">
+                </p>
+                <p>
+                    <label class="w3-text-blue"><b>Mô tả</b></label>
+                    <input class="w3-input w3-border" name="description" type="text">
+                </p>
+                <p>
+                    <label class="w3-text-blue"><b>Ảnh</b></label>
+                    <input class="w3-input w3-border" name="thumbnail" type="text">
+                </p>
+                <p>
+                    <label class="w3-text-blue"><b>Nội dung</b></label>
+                    <input class="w3-input w3-border" name="content" type="text">
+                </p>
+                <p>
+                    <label class="w3-text-blue"><b>Danh mục</b></label>
+                    <input class="w3-input w3-border" name="category" type="text">
+                </p>
+                <p>
+                    <label class="w3-text-blue"><b>Ngày tạo</b></label>
+                    <input class="w3-input w3-border" name="createdAt" type="date">
+                </p>
+                <p>
+                    <label class="w3-text-blue"><b>Ngày sửa</b></label>
+                    <input class="w3-input w3-border" name="updatedAt" type="date">
+                </p>
+                <p>
+                    <label class="w3-text-blue"><b>Trạng thái</b></label>
+                    <input class="w3-input w3-border" name="status" type="number">
+                </p>
+                <p>
+                    <input type="submit" class="w3-btn w3-blue" name="submit" value="Save">
+                    <input type="reset" class="w3-btn w3-blue" value="Reset">
+                </p>
+
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // chờ document load đầy đủ, dựng cây DOM.
+        document.addEventListener('DOMContentLoaded', function () {
+            var action = 1; // 1 là tạo mới, 2 là update.
+            var url = 'http://localhost:8080/api/v1/supernews';
+            var method = 'POST';
+            // check id tồn tại hay không?
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (id) {
+                action = 2; // chuyển trạng thái form sang update
+            }
+            // lấy btn submit
+            var btnSubmit = document.forms['product-form']['submit'];
+            // lấy thông tin input
+            var inputTitle = document.forms['product-form']['title'];
+            var inputDescription = document.forms['product-form']['description'];
+            var inputThumbnail = document.forms['product-form']['thumbnail'];
+            var inputContent = document.forms['product-form']['content'];
+            var inputCategory = document.forms['product-form']['category'];
+            var inputCreatedAt = document.forms['product-form']['createdAt'];
+            var inputUpdatedAt = document.forms['product-form']['updatedAt'];
+            var inputStatus = document.forms['product-form']['status'];
+
+
+
+            
+            if (action === 2) {
+                url = `http://localhost:8080/api/v1/supernews/${id}`;
+                method = 'PUT';
+                loadProductDetail(id);
+            }
+            btnSubmit.onclick = function (e) {
+                debugger;
+                e.preventDefault(); // không để submit           
+                var objectToSend = {
+                    'title': inputTitle.value,
+                    'description': inputDescription.value,
+                    'thumbnail': inputThumbnail.value,
+                    'content': inputContent.value,
+                    'category': inputCategory.value,
+                    'createdAt': inputCreatedAt.value,
+                    'updatedAt': inputUpdatedAt.value,
+                    'status': inputStatus.value
+
+
+                }
+                var data = JSON.stringify(objectToSend); // parse từ obj to string
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 201 || xhr.status === 200) {
+                        alert('Thao tác thành công');
+                        window.location.href = 'index.html'; // đưa về trang danh sách sản phẩm.
+                    }
+                }
+                xhr.open(method, url, false);
+                xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                xhr.send(data);
+            }
+        });
+
+        function loadProductDetail(id) {
+            var getProductDetailUrl = `http://localhost:8080/api/v1/supernews/${id}`;
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        var productDetail = JSON.parse(xhr.responseText);
+                        document.forms['product-form']['title'].value = productDetail.title;
+                        document.forms['product-form']['description'].value = productDetail.description;
+                        document.forms['product-form']['thumbnail'].value = productDetail.thumbnail;
+                        document.forms['product-form']['content'].value = productDetail.content;
+                        document.forms['product-form']['category'].value = productDetail.category;
+                        document.forms['product-form']['createdAt'].value = productDetail.createdAt;
+                        document.forms['product-form']['updatedAt'].value = productDetail.updatedAt;
+                        document.forms['product-form']['status'].value = productDetail.status;
+                    } else {
+                        alert('Không thể load sản phẩm!');
+                    }
+                }
+            }
+            xhr.open('GET', getProductDetailUrl, false);
+            xhr.send();
+        }
+    </script>
+</body>
+
+</html>
